@@ -22,6 +22,7 @@ from taipy.common.config.common._validate_id import _validate_id
 from taipy.common.config.common.scope import Scope
 from taipy.common.logger._taipy_logger import _TaipyLogger
 
+from ... import Config
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
 from .._entity._properties import _Properties
@@ -35,7 +36,6 @@ from ..reason import DataNodeEditInProgress, DataNodeIsNotWritten
 from ._filter import _FilterDataNode
 from .data_node_id import DataNodeId, Edit
 from .operator import JoinOperator
-from ... import Config
 
 
 def _update_ready_for_reading(fct):
