@@ -35,6 +35,7 @@ from ..reason import DataNodeEditInProgress, DataNodeIsNotWritten
 from ._filter import _FilterDataNode
 from .data_node_id import DataNodeId, Edit
 from .operator import JoinOperator
+from ... import Config
 
 
 def _update_ready_for_reading(fct):
@@ -103,9 +104,9 @@ class DataNode(_Entity, _Labeled):
 
     _ID_PREFIX = "DATANODE"
     __ID_SEPARATOR = "_"
+    _MANAGER_NAME: str = "data"
     _logger = _TaipyLogger._get_logger()
     _REQUIRED_PROPERTIES: List[str] = []
-    _MANAGER_NAME: str = "data"
     _PATH_KEY = "path"
     __EDIT_TIMEOUT = 30
 
@@ -146,6 +147,8 @@ class DataNode(_Entity, _Labeled):
         self._edits: List[Edit] = edits or []
 
         self._properties: _Properties = _Properties(self, **kwargs)
+        dn_cfg = Config.data_nodes.get(self._config_id, None)
+        self._ranks: Dict[str, int] = dn_cfg._ranks if dn_cfg else {}
 
     def __eq__(self, other) -> bool:
         """Check if two data nodes are equal."""
@@ -176,7 +179,7 @@ class DataNode(_Entity, _Labeled):
 
     @property
     def owner_id(self) -> Optional[str]:
-        """The identifier of the owner (sequence_id, scenario_id, cycle_id) or None."""
+        """The identifier of the owner (scenario_id, cycle_id or None)."""
         return self._owner_id
 
     @property  # type: ignore
@@ -433,6 +436,8 @@ class DataNode(_Entity, _Labeled):
 
     def write(self, data, job_id: Optional[JobId] = None, **kwargs: Dict[str, Any]):
         """Write some data to this data node.
+
+        once the data is written, the data node is unlocked and the edit is tracked.
 
         Parameters:
             data (Any): The data to write to this data node.
